@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "ResultadoDoJogo",
+    "slug": "ResultadoDoJogo",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
