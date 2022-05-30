@@ -7,27 +7,29 @@ async function getResultadoDoDia(url) {
   let returnRes = await resultado.json()
   let selecionarResult = await returnRes.ResultadoDoDia
 
+  let estacoes = await selecionarResult
   let titulo = await selecionarResult.tituloResultado
-  console.log(titulo)
-  console.log(typeof titulo + "1")
-  return await titulo
+  console.log(estacoes)
+
+  console.log(typeof estacoes + "1")
+  return await estacoes
 }
 
 
 export default function App() {
 
-  const [tituloJogo, setTituloJogo] = useState(null);
+  const [tituloJogo, setTituloJogo] = useState("Titulo Resultado");
   const url = 'https://scrapingdobicho-backend.herokuapp.com/resultado-dia'
 
-  function atualizaTitulo (){
-    let tituloRes = getResultadoDoDia(url);
-    console.log(typeof tituloRes + "2")
+  async function atualizaTitulo (){
+    let tituloRes = await getResultadoDoDia(url);
+    console.log(typeof  tituloRes.tituloResultado + "2")
+    setTituloJogo(tituloRes.tituloResultado)
   }
 
   useEffect(() => {
-    let titleResult = 'Titulo Resultado'
-    //titleResult = getResultadoDoDia(url);
-    setTituloJogo(titleResult)
+    //let tituloRes = await getResultadoDoDia(url);
+    //setTituloJogo(tituloRes.tituloResultado)
   })
 
   return (
@@ -37,8 +39,9 @@ export default function App() {
       <TouchableOpacity
         onPress={() => atualizaTitulo()}
         title={'Adicionar Data2'}
+        style={styles.botaoTitulo}
       >
-        <Text>{'Adicionar Data'}</Text>
+        <Text>{'Atualizar Data'}</Text>
       </TouchableOpacity>
       <StatusBar style="auto" />
     </View>
@@ -55,5 +58,13 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 20,
     fontWeight: 'bold'
+  },
+  botaoTitulo: {
+    width: '100%',
+    height: '100%',
+    fontSize: 10,
+    fontWeight: 'bold',
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
