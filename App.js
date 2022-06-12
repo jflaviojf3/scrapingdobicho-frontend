@@ -1,19 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, BackHandler, ScrollView, SafeAreaView, Dimensions } from 'react-native';
 
-import ResultadoTabela from './ResultadoTabela';
+//import ResultadoTabela from './ResultadoTabela';
+
+const { width, height } = Dimensions.get('window');
 
 async function getResultadoDoDia(url) {
   let resultado = await fetch(url);
   let returnRes = await resultado.json()
   let selecionarResult = await returnRes.ResultadoDoDia
-
   let estacoes = await selecionarResult
-  let titulo = await selecionarResult.tituloResultado
+  
   return await estacoes
 }
 
+async function atualizarResultado() {
+  fetch('https://scrapingdobicho-backend.herokuapp.com/atualizar-resultado');
+}
 
 export default function App() {
 
@@ -23,58 +27,13 @@ export default function App() {
 
   const url = 'https://scrapingdobicho-backend.herokuapp.com/resultado-dia'
 
-  async function atualizaTitulo() {
-    var resultadoDoDia = 
-    /*{
-      "tituloResultado": "Sexta-Feira, 03 de Junho de 2022",
-      "PTM": {
-        "p1": "5999-25",
-        "p2": "9613-4",
-        "p3": "7971-18",
-        "p4": "2686-22",
-        "p5": "3406-2",
-        "p6": "9675-19",
-        "p7": "668-17"
-      },
-      "PT": {
-        "p1": "4431-8",
-        "p2": "6031-8",
-        "p3": "5670-18",
-        "p4": "4161-16",
-        "p5": "6506-2",
-        "p6": "6799-25",
-        "p7": "723-6"
-      },
-      "PTV": {
-        "p1": "1587-22",
-        "p2": "7717-5",
-        "p3": "2220-5",
-        "p4": "8308-2",
-        "p5": "4279-20",
-        "p6": "4111-3",
-        "p7": "246-12"
-      },
-      "PTN": {
-        "p1": "9344-11",
-        "p2": "6048-12",
-        "p3": "8691-23",
-        "p4": "4858-15",
-        "p5": "7951-13",
-        "p6": "6892-23",
-        "p7": "512-3"
-      },
-      "COR": {
-        "p1": "7402-1",
-        "p2": "6496-24",
-        "p3": "6077-20",
-        "p4": "0096-24",
-        "p5": "2763-16",
-        "p6": "2834-9",
-        "p7": "083-21"
-      }
-    }*/
+  useEffect(() => {
+    atualizarResultado()
+  }
+  )
 
-    await getResultadoDoDia(url);
+  async function atualizaTitulo() {
+    var resultadoDoDia = await getResultadoDoDia(url);
     delete resultadoDoDia.PTV
     var keysObj = Object.keys(resultadoDoDia)
 
@@ -106,29 +65,32 @@ export default function App() {
         resultadoDoDia.COR.key = getRandomInt(1, 10000000)
       }
     }
-
+    
     var valuesObj = Object.values(resultadoDoDia)
     setTituloJogo(valuesObj[0])
     setTituloResultado(keysObj)
+    
+    delete resultadoDoDia.tituloResultado
+    valuesObj = Object.values(resultadoDoDia)
     setResultado(valuesObj)
 
   }
 
   var mapResult = () => {
-    
-    return (
-      resultado.map(element => {
-        return (
-          <View key={element.key} style={{ margin: 30 }}>
 
-            <Text style={styles.resultadoTitu}>   {element.p}</Text>
-            <Text style={styles.resultado}>   |1º {element.p1}</Text>
-            <Text style={styles.resultado}>   |2º {element.p2}</Text>
-            <Text style={styles.resultado}>   |3º {element.p3}</Text>
-            <Text style={styles.resultado}>   |4º {element.p4}</Text>
-            <Text style={styles.resultado}>   |5º {element.p5}</Text>
-            <Text style={styles.resultado}>   |6º {element.p6}</Text>
-            <Text style={styles.resultado}>   |7º {element.p7}</Text>
+    return (
+      resultado.map((element, index) => {
+        return (
+          <View key={index} style={{ margin: 30 }}>
+
+            <Text style={styles.resultadoTitu}>      {element.p}</Text>
+            <Text style={styles.resultado}>     1º - {element.p1}</Text>
+            <Text style={styles.resultado}>     2º - {element.p2}</Text>
+            <Text style={styles.resultado}>     3º - {element.p3}</Text>
+            <Text style={styles.resultado}>     4º - {element.p4}</Text>
+            <Text style={styles.resultado}>     5º - {element.p5}</Text>
+            <Text style={styles.resultado}>     6º - {element.p6}</Text>
+            <Text style={styles.resultado}>     7º - {element.p7}</Text>
           </View>
         );
       }))
@@ -136,17 +98,25 @@ export default function App() {
 
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Resultado do Jogo do Bicho</Text>
-      <Text style={styles.titulo}>{tituloJogo}</Text>
-      <Text style={styles.resultado}>{mapResult()}</Text>
-      <TouchableOpacity
-        onPress={() => atualizaTitulo()}
-        style={styles.botaoTitulo}
-      ><Text>{'Atualizar Resultado'}</Text>
-      </TouchableOpacity>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView >
+        <Text style={styles.titulo}>Resultado do Jogo do Bicho</Text>
+        <Text style={styles.titulo}>{tituloJogo}</Text>
+        <Text >{mapResult()}</Text>
+
+        <TouchableOpacity
+          onPress={() => atualizaTitulo()}
+          style={styles.botaoTitulo}
+        ><Text>{'Atualizar Resultado'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => BackHandler.exitApp()}
+          style={styles.botaoTituloSair}
+        ><Text>{'Fechar Resultado'}</Text>
+        </TouchableOpacity>
+        <StatusBar style="auto" />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -156,10 +126,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     paddingTop: 50,
+    
   },
   titulo: {
-    fontSize: 20,
-    fontWeight: 'bold'
+    fontSize: 25,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: "center",
   },
   botaoTitulo: {
     borderRadius: 50,
@@ -171,8 +144,20 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     marginLeft: 12,
     margin: 15,
-  }, resultadoTitu: {
-    fontSize: 20,
+  },
+  botaoTituloSair: {
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "90%",
+    backgroundColor: "#fab4c6",
+    paddingTop: 14,
+    paddingBottom: 14,
+    marginLeft: 12,
+    margin: 15,
+  },
+  resultadoTitu: {
+    fontSize: 30,
     fontWeight: 'bold'
   }, resultado: {
     fontSize: 25,
